@@ -17,13 +17,18 @@ cat index.base | tr -d '|' > index.en.html
 cp index.base index.es.html
 # Replace strings in spanish version.
 cat translation.es | grep -v ^# | while read line; do
-  en=$(echo "$line" | cut -d= -f1)
+  en=$(echo "$line" | cut -d= -f1 | tr -d '|')
   es=$(echo "$line" | cut -d= -f2)
-  sed -i "s#$en#$es#g" index.es.html
+  perl -p -i -e "s#$en#$es#;" index.es.html
 done
+
+temp=$(mktemp)
+# Now remove pipes from spanish file
+cat index.es.html | tr -d '|' > "$temp"
+mv "$temp" index.es.html
 
 # Optionally pass base as first argument (if you are running this version in a 
 # subdirectory), e.g.: ./generate-pages "/mexcla"
-sed -i "s#{base}#$base#g" index.en.html
-sed -i "s#{base}#$base#g" index.es.html
+perl -p -i -e "s#{base}#$base#;" index.en.html
+perl -p -i -e "s#{base}#$base#;" index.es.html
 
