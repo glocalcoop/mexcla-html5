@@ -1,4 +1,0 @@
-This directory must contain a symlink to the following files found 
-in the sipml library (https://code.google.com/p/sipml5):
-
-SIPml-api.js -> /path/to/sipml/library/release/SIPml-api.js
