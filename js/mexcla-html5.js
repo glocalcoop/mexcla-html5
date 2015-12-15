@@ -17,7 +17,7 @@ $("#mode-original").click(function() {
   mexcla_mode_original();
 });
 
-$("#mode-here-interpretation").click(function() {
+$("#mode-hear-interpretation").click(function() {
   mexcla_mode_hear_interpretation();
 });
 
