@@ -33,10 +33,6 @@ function mexcla_init() {
 }
 
 function mexcla_login() {
-      'ws_servers': config.websocket_proxy_url,
-      'uri': config.impu,
-      'password': config.password,
-
   verto = new $.verto({
       login: config.impi,
       passwd: config.password,
