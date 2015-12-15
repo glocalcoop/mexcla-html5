@@ -25,7 +25,7 @@ $("#mode-provide-interpretation").click(function() {
   mexcla_mode_provide_interpretation();
 });
 
-$("#connect_button").click(function() {
+$("#connect-button").click(function() {
   mexcla_toggle_call_status();
 });
 
