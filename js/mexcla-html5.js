@@ -1,7 +1,11 @@
-var gSession;
+var cur_call = null;
+var verto;
+
+mexcla_init();
+
 
 function mexcla_toggle_call_status() {
-  if(gSession) {
+  if(cur_call) {
     mexcla_hangup();
   } else {
     mexcla_call_init();
@@ -9,11 +13,11 @@ function mexcla_toggle_call_status() {
 }
 
 function mexcla_hangup() {
-  if(gSession) {
-    gSession.terminate();
-    // Unset gSession so when the user tries to re-connect
+  if(cur_call) {
+    verto.hangup();
+    // Unset cur_call so when the user tries to re-connect
     // we know to re-connect
-    gSession = null;
+    cur_call = null;
   }
   change_submit_button_value(lang_connect);
   // Seems to prevent reconnection without a page reload
@@ -26,6 +30,26 @@ function mexcla_init() {
   $('.pstn-instructions-conference-number').append(conf);
   mexcla_init_language_links();
   mexcla_init_iframes();
+}
+
+function mexcla_login() {
+      'ws_servers': config.websocket_proxy_url,
+      'uri': config.impu,
+      'password': config.password,
+
+  verto = new $.verto({
+      login: config.impi,
+      passwd: config.password,
+      socketUrl: config.websocket_proxy_url,
+      tag: "audio-remote",
+      videoParams: {},
+      audioParams: {
+        googAutoGainControl: false,
+        googNoiseSuppression: false,
+        googHighpassFilter: false
+      },
+      iceServers: true,
+  });
 }
 
 function mexcla_init_language_links() {
@@ -44,43 +68,6 @@ function mexcla_init_language_links() {
   document.getElementById('en-switch-link').href = en;
 }
 
-function mexcla_init_iframes() {
-  params = mexcla_get_url_params()
-  for (var i = 0; i < params.length; i++) {
-    param = params[i];
-    if(param.substr(0,3) == 'irc') {
-      mexcla_toggle_irc();
-    }
-    else if(param.substr(0,4) == 'calc') {
-      mexcla_toggle_calc();
-    }
-  }
-}
-
-function mexcla_toggle_irc() {
-  mexcla_toggle_iframe('irc-frame', 'https://irc.koumbit.net/?channels=#' + mexcla_get_hash() + '&nick=guest');
-}
-
-function mexcla_toggle_pad() {
-  // We use mexcla_get_hash so the calc pages created aren't so trivially discovered.
-  mexcla_toggle_iframe('pad-frame', 'https://pad.riseup.net/p/' + mexcla_get_hash());
-}
-
-function mexcla_toggle_iframe(id,url, extra)  {
-  if($('#' + id).length == 0) {
-    // The element doesn't exist, add it.
-    mexcla_add_iframe(id, url, extra);
-    $('.draggable').draggable();
-  }
-  else{
-    $('#' + id).remove();
-  }
-}
-
-function mexcla_toggle_calc() {
-  // We use mexcla_get_hash so the calc pages created aren't so trivially discovered.
-  mexcla_toggle_iframe('calc-frame', 'https://calc.mayfirst.org/' + mexcla_get_hash());
-}
 
 // Generate a random-looking hash that will be the same for everyone on the
 // same conference call.
@@ -99,66 +86,41 @@ function mexcla_call_init() {
     alert("Conference numbers must be equal to or below 999,999,999. Your number is " + conf);
     return false;
   }
-  // Initialize the engine
-  var configuration = {
-      'ws_servers': config.websocket_proxy_url,
-      'uri': config.impu,
-      'password': config.password,
-      // Seems like a bug - if this is left out (default true), we get an error:
-      // 422 Session Interval Too Small
-      'session_timers': false
-  };
-  var coolPhone = new JsSIP.UA(configuration);
-  coolPhone.start();
-  var audioRemote =  document.getElementById('audio-remote');
-  var eventHandlers = {
-    'connecting':   function(e){ 
-      change_submit_button_value(lang_connecting);
-    },
-    'failed':     function(e){ 
-      mexcla_handle_error(e);
-    },
-    'confirmed':  function(e){
-      change_submit_button_value(lang_disconnect);
-      mexcla_join_conference();
-      // Attach local stream to selfView
-      // selfView.src = window.URL.createObjectURL(session.connection.getLocalStreams()[0]);
-    },
-    'addstream':  function(e) {
-      var stream = e.stream;
+   
+  if(cur_call) {
+    return;
+  }
 
-      // Attach remote stream to remoteView
-      audioRemote.src = window.URL.createObjectURL(stream);
-    },
-    'ended':      function(e){ /* Your code here */ }
-  }; 
-  var options = {
-    'eventHandlers': eventHandlers,
-    // 'extraHeaders': [ 'X-Foo: foo', 'X-Bar: bar' ],
-    'mediaConstraints': {'audio': true, 'video': false},
-    'pcConfig': {
-      'iceServers': config.ice_servers
-     }
+  cur_call = verto.newCall({
+    destination_number: "9999",
+    caller_id_name: "Mexcla",
+    caller_id_number: "web",
+    useVideo: false,
+    useStereo: false
+  },callbacks);
 
-  };
-
-  session = coolPhone.call('sip:9999@talk.mayfirst.org', options);
-  // Initialize radio buttons
+ // Initialize radio buttons
   mexcla_check_radio_button('mic-unmute');
   mexcla_check_radio_button('mode-original');
-
-  // Save session in global variable
-  // so we can call the dtmf method
-  // throughout the call
-  gSession = session;
 }
 
-function mexcla_handle_error(data) {
-  console.log(data);
-  alert(data.cause);
-
-
+callbacks = {
+  onDialogState: function(d) {
+    cur_call = d;
+    console.log(d.state);
+    switch (d.state) {
+      case $.verto.enum.state.requesting:
+        change_submit_button_value(lang_connecting);
+        break;
+      case $.verto.enum.state.active:
+        change_submit_button_value(lang_disconnect);
+        mexcla_join_conference();
+        break;
+    }
+  }
 }
+  
+ 
 function mexcla_get_url_params() {
   // Split the url by /, skipping the first / so we don't have an empty value first.
   parts = window.location.pathname.substr(1).split('/');
@@ -215,9 +177,8 @@ function mexcla_join_conference() {
 }
 
 function mexcla_dtmf(key) {
-  if(gSession) {
-    var ret = gSession.sendDTMF(key);
-    // alert("Sent " + key + " got " + ret);
+  if(cur_call) {
+    var ret = cur_call.dtmf(key);
     return true;
   } else {
     alert(lang_not_yet_connected);
@@ -338,8 +299,3 @@ function mexcla_pause(s) {
   do { curDate = new Date(); }
   while(curDate - date < s);
 }
-
-function mexcla_add_iframe(id, src, extra) {
-  $("#user-objects").append('<td class="user-object" id="' + id + '"><span class="extra">' + extra + '</span> <span class="direct-link">' + lang_direct_link + ': <a target="_blank" href="' + src + '">' + src + '</a></span><br /><iframe class="draggable resizable" src="' + src + '"/></td>');
-}
-

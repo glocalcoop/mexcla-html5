@@ -4,12 +4,15 @@
     <title>Mexcla</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <style type="text/css" media="all">@import url("{base}/base.css");</style>
-    <script src="{base}/js/config.js" type="text/javascript"> </script>
-    <script src="{base}/js/jssip.min.js" type="text/javascript"> </script>
-    <script src="{base}/js/mexcla-html5.js" type="text/javascript"> </script>
-    <!-- apt-get install libjs-jquery libjs-jquery-ui javascript-common -->
     <script type="text/javascript" src="/javascript/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="/javascript/jquery-ui/jquery-ui.min.js"></script>
+    <script src="{base}/js/config.js" type="text/javascript"> </script>
+    <script src="{base}/js/jquery.json-2.4.min.js" type="text/javascript"> </script>
+    <script src="{base}/js/jquery.FSRTC.js" type="text/javascript"> </script>
+    <script src="{base}/js/jquery.jsonrpcclient.js" type="text/javascript"> </script>
+    <script src="{base}/js/jquery.verto.js" type="text/javascript"> </script>
+    <script src="{base}/js/mexcla-html5.js" type="text/javascript"> </script>
+    <!-- apt-get install libjs-jquery libjs-jquery-ui javascript-common -->
     <script type="text/javascript">
       // Define language strings here.
       var lang_connect = '|Connect|';
@@ -36,7 +39,7 @@
         </button>
       </div>
       <div id="connect-instructions">
-        <span class="pstn-instructions">|This system only works with recent versions Firefox. Click the connect button to join the conference call. If you have technical problems, you may also connected by dialing: USA +1.718.303.3204 OR 402.772.0337/MEXICO +52.55.85262875 and choose extension 6, and then enter conference number: |<span class="pstn-instructions-conference-number"></span></span>
+        <span class="pstn-instructions">|This system only works with recent versions Firefox. Click the connect button to join the conference call. If you have technical problems, you may also connected by dialing: USA +1.402.772.0337/MEXICO +52.55.85262875 and choose extension 6, and then enter conference number: |<span class="pstn-instructions-conference-number"></span></span>
       </div>
     </div>
 
@@ -60,20 +63,6 @@
       </div>
     </div>
 
-    <div id="iframe-selectors">
-        <img id="pencil" src="{base}/images/pencil.png" alt="pencil" />
-        <!-- Pencil image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Crystal_Clear_app_kaddressbook.png) and
-        author Everaldo Coelho (https://en.wikipedia.org/wiki/Everaldo_Coelho) and Yellowicon (http://www.yellowicon.com/) -->
-        <label><input onclick="mexcla_toggle_irc();" type="checkbox" id="irc-iframe-checkbox" />|Add Indymedia Text chat|</label>
-        <label><input onclick="mexcla_toggle_pad();" type="checkbox" id="pad-iframe-checkbox" />|Add Riseup Note Pad|</label>
-        <label><input onclick="mexcla_toggle_calc();" type="checkbox" id="calc-iframe-checkbox" />|Add MF/PL Spreadsheet|</label>
-      </div>
-
-    <div id="user-objects">
-      <table>
-        <tr></tr>
-      </table>
-    </div>
     <!-- The audio tag is not seen by the user (unless their browser doesn't support it) -->
     <div id="audio">
       <audio id="audio-remote" autoplay="autoplay">
