@@ -5,6 +5,8 @@ $(document).ready(function() {
     mexcla_init();
 });
 
+window.onunload = mexcla_hangup;
+
 $("#mic-mute").click(function() {
   mexcla_mic_mute();
 });
@@ -186,7 +188,7 @@ function mexcla_join_conference() {
   // group call, so we want people to start off muted.
   // Wait a few seconds for the call to fully complete, then start off the
   // user muted, so we don't have a cacaphony of noise as new people join.
-  if(digits[0] == 6) {
+  if(conf[0] == 6) {
     setTimeout(mexcla_mic_mute, 7000);
   }
 }
