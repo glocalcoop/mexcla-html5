@@ -1,8 +1,33 @@
 var cur_call = null;
 var verto;
 
-mexcla_init();
+$(document).ready(function() {
+    mexcla_init();
+});
 
+$("#mic-mute").click(function() {
+  mexcla_mic_mute();
+});
+
+$("#mic-unmute").click(function() {
+  mexcla_mic_unmute();
+});
+
+$("#mode-original").click(function() {
+  mexcla_mode_original();
+});
+
+$("#mode-here-interpretation").click(function() {
+  mexcla_mode_hear_interpretation();
+});
+
+$("#mode-provide-interpretation").click(function() {
+  mexcla_mode_provide_interpretation();
+});
+
+$("#connect_button").click(function() {
+  mexcla_toggle_call_status();
+});
 
 function mexcla_toggle_call_status() {
   if(cur_call) {
@@ -242,28 +267,24 @@ function mexcla_dots(next) {
 }
 
 function mexcla_mic_mute() {
-  if(mexcla_dtmf('*')) {
+  if(cur_call) {
+    cur_call.setMute('off');
     mexcla_check_radio_button('mic-mute');
     var current_src = $('#mic').attr('src');
     target_src = current_src.replace('mic.unmuted.png', 'mic.muted.png');
     $('#mic').attr('src', target_src);
   }
-  else {
-    mexcla_check_radio_button('mic-unmute');
-  }
-
 }
 function mexcla_mic_unmute() {
-  if(mexcla_dtmf('*')) {
+  if(cur_call) {
+    cur_call.setMute('on');
     mexcla_check_radio_button('mic-unmute');
     var current_src = $('#mic').attr('src');
     target_src = current_src.replace('mic.muted.png', 'mic.unmuted.png');
     $('#mic').attr('src', target_src);
   }
-  else {
-    mexcla_check_radio_button('mic-mute');
-  }
 }
+
 function mexcla_mode_original() {
   if(mexcla_dtmf('0')) {
     var current_src = $('#headset').attr('src');
