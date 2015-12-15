@@ -112,6 +112,9 @@ callbacks = {
         change_submit_button_value(lang_disconnect);
         mexcla_join_conference();
         break;
+      case $.verto.enum.state.hangup:
+        mexcla_hangup();
+        break;
     }
   }
 }
