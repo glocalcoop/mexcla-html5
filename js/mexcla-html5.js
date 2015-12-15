@@ -29,7 +29,6 @@ function mexcla_init() {
   console.log("Conference is: " + conf);
   $('.pstn-instructions-conference-number').append(conf);
   mexcla_init_language_links();
-  mexcla_init_iframes();
 }
 
 function mexcla_login() {
