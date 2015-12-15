@@ -181,16 +181,7 @@ function mexcla_join_conference() {
     return;
   }
 
-  // We have to send the conference number in single digits followed by #.
-  digits = conf.split('');
-  for (var i = 0; i < digits.length; i++) {
-    // If we send the digits too quickly freeswitch can't process
-    // them reliably.
-    mexcla_pause(200);
-    mexcla_dtmf(digits[i]);
-  }
-  mexcla_pause(200);
-  mexcla_dtmf('#');
+  mexcla_dtmf(conf + '#');
   // If the conference number starts with a 6 - it means it's a big
   // group call, so we want people to start off muted.
   // Wait a few seconds for the call to fully complete, then start off the
@@ -310,12 +301,3 @@ function mexcla_mode_provide_interpretation() {
   }
 }
 
-// Thanks to http://stackoverflow.com/questions/951021/what-do-i-do-if-i-want-a-javascript-version-of-sleep
-// I realize this is "wrong" and freezes up the browser, but setTimeout doesn't
-// seem to work when called within the sipml context.
-function mexcla_pause(s) {
-  var date = new Date();
-  var curDate = null;
-  do { curDate = new Date(); }
-  while(curDate - date < s);
-}
