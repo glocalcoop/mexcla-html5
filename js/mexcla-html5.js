@@ -47,8 +47,6 @@ function mexcla_hangup() {
     cur_call = null;
   }
   change_submit_button_value(lang_connect);
-  // Seems to prevent reconnection without a page reload
-  location.reload();
 }
 
 function mexcla_init() {
