@@ -5,8 +5,6 @@ $(document).ready(function() {
     mexcla_init();
 });
 
-window.onunload = mexcla_hangup;
-
 $("#mic-mute").click(function() {
   mexcla_mic_mute();
 });
@@ -41,7 +39,7 @@ function mexcla_toggle_call_status() {
 
 function mexcla_hangup() {
   if(cur_call) {
-    verto.hangup();
+    cur_call.hangup();
     // Unset cur_call so when the user tries to re-connect
     // we know to re-connect
     cur_call = null;
@@ -120,9 +118,18 @@ function mexcla_call_init() {
     useStereo: false
   },callbacks);
 
- // Initialize radio buttons
+  // Initialize radio buttons
   mexcla_check_radio_button('mic-unmute');
   mexcla_check_radio_button('mode-original');
+  // Specify function to run if the user navigates away from this page.
+  $.verto.unloadJobs = [ mexcla_unload ];
+}
+
+function mexcla_unload() {
+  // If the user navigates away from the page, be sure to hang up the 
+  // call. Otherwise, they will remain as a ghost in the conference
+  // and if they reload the page, they will be connected twice.
+  mexcla_hangup();
 }
 
 callbacks = {
