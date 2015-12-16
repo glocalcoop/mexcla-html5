@@ -51,6 +51,7 @@ function mexcla_init() {
   conf = mexcla_get_conference_number();
   console.log("Conference is: " + conf);
   $('.pstn-instructions-conference-number').append(conf);
+  $("#pad-link").attr("href", "https://pad.riseup.net/p/mexcla-" + conf)
   mexcla_init_language_links();
   mexcla_login();
 }

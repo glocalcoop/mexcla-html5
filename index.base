@@ -35,6 +35,9 @@
     </div>
 
     <div id="call-options" style="display:none">
+      <div id="pad-link">
+        <a target="_blank" id="pad-link" href="">Take notes together via this Pad</a>
+      </div>
       <div id="microphone-status">
         <img id="mic" src="{base}/images/mic.unmuted.png" alt="microphone" />
         <!-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
