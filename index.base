@@ -35,7 +35,7 @@
     </div>
 
     <div id="call-options" style="display:none">
-      <div id="pad-link">
+      <div id="pad">
         <a target="_blank" id="pad-link" href="">Take notes together via this Pad</a>
       </div>
       <div id="microphone-status">
