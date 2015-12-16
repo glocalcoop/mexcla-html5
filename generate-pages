@@ -26,6 +26,7 @@ temp=$(mktemp)
 # Now remove pipes from spanish file
 cat index.es.html | tr -d '|' > "$temp"
 mv "$temp" index.es.html
+chmod 644 "index.es.html"
 
 # Optionally pass base as first argument (if you are running this version in a 
 # subdirectory), e.g.: ./generate-pages "/mexcla"
