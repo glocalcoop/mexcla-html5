@@ -30,7 +30,7 @@
         </button>
       </div>
       <div id="connect-instructions">
-        <span class="pstn-instructions">|This system only works with recent versions Firefox and Chrome. It does not work on iPads or iPhones. Click the connect button to join the conference call. If you have technical problems, you may also connected by dialing: USA +1.402.772.0337/MEXICO +52.55.85262875 and choose extension 6, and then enter conference number: |<span class="pstn-instructions-conference-number"></span></span>
+        <span class="pstn-instructions">|This system only works with recent versions Firefox and Chrome. It does not work on iPads or iPhones. Click the connect button to join the conference call. If you have technical problems, you may also connected by dialing: USA 1 402 772 0337 or MEXICO 52 55 85262875 and choose extension 6, and then enter conference number: |<span class="pstn-instructions-conference-number"></span></span>
       </div>
     </div>
 
