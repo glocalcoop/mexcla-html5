@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div id="call-options">
+    <div id="call-options" style="display:none">
       <div id="microphone-status" style="display:none">
         <img id="mic" src="{base}/images/mic.unmuted.png" alt="microphone" />
         <!-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which

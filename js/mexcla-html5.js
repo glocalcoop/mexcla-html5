@@ -223,14 +223,15 @@ function change_submit_button_value(val) {
     // We're disconnecting, so change the picture to the
     // disconnected phone.
     target_src = current_src.replace('phone.connected.png', 'phone.disconnected.png');
+    $('#call-options').hide();
   }
-  else if(val  == lang_disconnect) {
+  else if(val == lang_disconnect) {
     // We're connecting... kill the dots animation.
     clearInterval(intervalId);
     // Ensure there are no current dots.
     mexcla_dots('');
     target_src = current_src.replace('phone.disconnected.png', 'phone.connected.png');
-    $('#microphone-status').show();
+    $('#call-options').show();
   }
   else {
     // When we are connecting... the picture should remain showing
