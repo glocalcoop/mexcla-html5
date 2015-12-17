@@ -56,7 +56,7 @@
               <input type="radio" name="mode" id="mode-hear-interpretation" value="hear-interpretation" />|Hear interpretation|
             </label>
             <label>
-              <input type="radio" name="mode" id="mode-provide-interpretation" value="provide-interpretation" />|Provide Interpretation|
+              <input type="radio" name="mode" id="mode-provide-interpretation" value="provide-interpretation" />|Provide interpretation|
             </label>
           </div>
       </div>
