@@ -1,95 +1,21 @@
 body {
-  font-family:Verdana,Geneva,Arial,Helvetica,sans-serif;
-  font-size:0.8em;
   margin-left: 5%;
   margin-right: 5%;
 }
 
-h1 {
-  font-size: 2em;
-  line-height: 0;
+#panel-body {
+  height: 150px;
 }
 
-#tagline {
-  color: gray;
-  font-style: italic;
-  padding-bottom: 10px;
-}
-
-input {
-  margin-bottom: 20px;
-}
-
-#language-links {
-  padding-bottom: 20px;
-}
-
-/* Pure css resize function. */
-.resizable {
-  resize: both;
+#chatwin {
   overflow: auto;
+  height: 124px;
 }
 
-/* Start iframe at 30% since we can seem to resize smaller than the initial size. */
-iframe {
-  border: 8px solid grey;
-  width: 90%;
-  height: 90%;
+div {
+  padding-bottom: 5px;
 }
 
-.direct-link {
-  color: grey;
-  font-size: .8em;
-}
-
-.extra {
-  font-size: .8em;
-}
-
-.user-object {
-  width: 400px;
-  height: 490px;
-  text-align: right;
-}
-#mic, #headset, #phone, #pencil, label, #connect-button, #connect-button-text, #connect {
-  vertical-align: middle;
-}
-
-#connect-button{
-  /* Only setting margin-buttom because vertical-align is ignored. */
-  margin-bottom: 15px;
-}
-#connect-icon-and-button {
-  /* This is designed to center the div's contents horizontally. */
-  width: 27%;
-  margin: 0 auto;
-}
-
-#connect-button {
-  background-color: #995e26;
-  -moz-border-radius: 15px;
-  -webkit-border-radius: 15px;
-  border-radius: 15px;
-  border: 2px solid #440a11;
-  padding: 4px;
-  /* This margin-top is only hear because vertical-align doesn't seem to work. */
-  margin-top: 15px;
-  color: #ffffff;
-}
-
-#connect-instructions {
-  padding-top: 0px;
-  padding-bottom: 20px;
-  text-align: center;
-  font-style: italic;
-}
-
-#connect {
-  /* Controlling width to prevent the phone instructions from stretching out
-   * to far, which makes the whole page look ugly. */
-  width: 600px;
-}
-
-#pad {
-  padding-bottom: 10px;
+.chatuid {
+  font-weight: bold;
 }

@@ -29,6 +29,26 @@ $("#connect-button").click(function() {
   mexcla_toggle_call_status();
 });
 
+function mexcla_setup_chat() {
+  $("#chatsend").click(function() {
+	  if (!cur_call) {
+	    return;
+	  }
+	  cur_call.message({to: "public@talk.mayfirst.org", 
+			  body: $("#chatmsg").val(), 
+			  from_msg_name: $("#name").val(), 
+			  from_msg_number: mexcla_get_conference_number()
+	 });  
+	 $("#chatmsg").val("");
+ });
+
+  $("#chatmsg").keyup(function (event) {
+    if (event.keyCode == 13 && !event.shiftKey) {
+	    $( "#chatsend" ).trigger( "click" );   
+	  }
+  });
+}
+
 function mexcla_toggle_call_status() {
   if(cur_call) {
     mexcla_hangup();
@@ -54,6 +74,7 @@ function mexcla_init() {
   $("#pad-link").attr("href", "https://pad.riseup.net/p/mexcla-" + conf)
   mexcla_init_language_links();
   mexcla_login();
+  mexcla_setup_chat();
 }
 
 function mexcla_login() {
@@ -118,6 +139,16 @@ function mexcla_call_init() {
     useVideo: false,
     useStereo: false
   },callbacks);
+  verto.subscribe("presence", {
+    handler: function(v, e) {
+      mexcla_presence_event(e);
+    }
+  });
+  verto.subscribe("FSevent.message", {
+    handler: function(v, e) {
+      mexcla_message_event(e);
+    }
+  });
 
   // Initialize radio buttons
   mexcla_check_radio_button('mic-unmute');
@@ -151,8 +182,73 @@ callbacks = {
     }
   }
 }
-  
- 
+
+function mexcla_message_event(e) {
+  console.log("message event");
+  body = e.data._body;
+  from = e.data.from_msg_name;
+  dest_conf = e.data.from_msg_number;
+  // Filter out messages for difference conference rooms
+  if (dest_conf != mexcla_get_conference_number()) {
+    return;
+  }
+  $('#chatwin')
+    .append($('<span class="chatuid" />').text(from + ': '))
+    .append(mexcla_text_to_jq(body));
+  $('#chatwin').animate({"scrollTop": $('#chatwin')[0].scrollHeight}, "fast");
+}
+
+function mexcla_presence_event(e) {
+  console.log("presence event");
+  console.log(e);
+} 
+
+// Copied from verto.js library.
+function mexcla_text_to_jq(body) {
+  // Builds a jQuery collection from body text, linkifies http/https links, imageifies http/https links to images, and doesn't allow script injection
+  var match, $link, img_url, $body_parts = $(), rx = /(https?:\/\/[^ \n\r]+|\n\r|\n|\r)/;
+  while ((match = rx.exec(body)) !== null) {
+    if (match.index !== 0) {
+      $body_parts = $body_parts.add(document.createTextNode(body.substr(0, match.index)));
+    }
+
+    if (match[0].match(/^(\n|\r|\n\r)$/)) {
+      // Make a BR from a newline
+      $body_parts = $body_parts.add($('<br />'));
+      body = body.substr(match.index + match[0].length);
+    } else {
+      // Make a link (or image)
+      $link = $('<a target="_blank" />').attr('href', match[0]);
+      
+      if (match[0].search(/\.(gif|jpe?g|png)/) > -1) {
+        // Make an image
+        img_url = match[0];
+
+        // Handle dropbox links
+        if (img_url.indexOf('dropbox.com') !== -1) {
+          if (img_url.indexOf('?dl=1') === -1 && img_url.indexOf('?dl=0') === -1) {
+            img_url += '?dl=1';
+          } else if (img_url.indexOf('?dl=0') !== -1) {
+            img_url = img_url.replace(/dl=0$/, 'dl=1');
+          }
+        }
+
+        $link.append($('<img border="0" class="chatimg" />').attr('src', img_url));
+      } else {
+        // Make a link
+        $link.text(match[0]);
+      }
+
+      body = body.substr(match.index + match[0].length);
+      $body_parts = $body_parts.add($link);
+    }
+  }
+  if (body) {
+    $body_parts = $body_parts.add(document.createTextNode(body));
+  }
+  return $body_parts;
+}
+
 function mexcla_get_url_params() {
   // Split the url by /, skipping the first / so we don't have an empty value first.
   parts = window.location.pathname.substr(1).split('/');
@@ -218,12 +314,7 @@ function mexcla_check_radio_button(id) {
 intervalId = 0;
 function change_submit_button_value(val) {
   $('#connect-button-text').text(val);
-  var current_src = $('#phone').attr('src');
-  var target_src = '';
   if(val == lang_connect) {
-    // We're disconnecting, so change the picture to the
-    // disconnected phone.
-    target_src = current_src.replace('phone.connected.png', 'phone.disconnected.png');
     $('#call-options').hide();
   }
   else if(val == lang_disconnect) {
@@ -231,18 +322,14 @@ function change_submit_button_value(val) {
     clearInterval(intervalId);
     // Ensure there are no current dots.
     mexcla_dots('');
-    target_src = current_src.replace('phone.disconnected.png', 'phone.connected.png');
     $('#call-options').show();
   }
   else {
-    // When we are connecting... the picture should remain showing
-    // the disconnected phone.
-    // However, we should update the text to add an animation effect
+    // When we are connecting... we should update the text to add an animation effect
     // of the dots progressing...
     intervalId = setInterval(mexcla_dots,500);
     return;
   }
-  $('#phone').attr('src', target_src);
 }
 
 // Simulate an animation of dots

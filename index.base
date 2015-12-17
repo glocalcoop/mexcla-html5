@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <title>Mexcla</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <style type="text/css" media="all">@import url("{base}/bootstrap/css/bootstrap.min.css");</style>
     <style type="text/css" media="all">@import url("{base}/base.css");</style>
     <script type="text/javascript">
       // Define language strings here.
@@ -14,57 +16,80 @@
     </script>
   </head>
   <body>
-    <div id="header">
+    <div class="row" id="header">
       <img id="logo" alt="Dandilion" src="{base}/images/logo.png" /></td>
-      <div id="tagline">|Mexcla: The May First/People Link simultaneous interpretation conference system|</div>
+      <div class="well">|Mexcla: The May First/People Link simultaneous interpretation conference system|</div>
       <div id="language-links"><a id="es-switch-link" href="/es/">es</a> <a id="en-switch-link" href="/en/">en</a></div>
     </div>
-
-    <div id="connect">
+    <div class="row" id="connect">
       <div id="connect-icon-and-button">
-        <!-- Phone image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Emblem_phone.svg) and g ambrus
-        (https://commons.wikimedia.org/wiki/User:G_ambrus) -->
-        <img id="phone" src="{base}/images/phone.disconnected.png" alt="phone" />
-        <button id="connect-button">
-          <span id="connect-button-text">|Connect|</span><span id="connect-dots"></span>
+        <button class="btn btn-lg btn-primary" id="connect-button">
+          <span id="connect-button-text">Connect</span><span id="connect-dots"></span>
         </button>
-      </div>
-      <div id="connect-instructions">
-        <span class="pstn-instructions">|This system only works with recent versions Firefox and Chrome. It does not work on iPads or iPhones. Click the connect button to join the conference call. If you have technical problems, you may also connected by dialing: USA 1 402 772 0337 or MEXICO 52 55 85262875 and choose extension 6, and then enter conference number: |<span class="pstn-instructions-conference-number"></span></span>
       </div>
     </div>
 
     <div id="call-options" style="display:none">
-      <div id="pad">
-        <a target="_blank" id="pad-link" href="">|Take notes together via this Pad|</a>
+      <div class="row">
+        <div id="pad">
+          <a target="_blank" id="pad-link" href="">|Take notes together via this Pad|</a>
+        </div>
       </div>
-      <div id="microphone-status">
-        <img id="mic" src="{base}/images/mic.unmuted.png" alt="microphone" />
-        <!-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
-        seems to have improved a version from Mimi Ladha. -->
+      <div class="row" id="microphone-status" class="radio">
+        <div class="radio">
+          <img id="mic" src="{base}/images/mic.unmuted.png" alt="microphone" />
+            <!-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
+              seems to have improved a version from Mimi Ladha. -->
+              <label><input type="radio" name="mic" id="mic-mute" value="mute" />|Mute|</label>
+            <label><input type="radio" name="mic" id="mic-unmute" value="unmute" />|Unmute|</label>
+        </div>
+      </div>
+      <div class="row" id="interpretation-mode">
+          <div class="radio">
+            <img id="headset" src="{base}/images/headset.bi.png" alt="headset" />
+            <!-- Headset image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Crystal_Clear_app_voice-support.png) and
+            author Everaldo Coelho (https://en.wikipedia.org/wiki/Everaldo_Coelho) and Yellowicon (http://www.yellowicon.com/) -->
+            <label>
+              <input type="radio" name="mode" id="mode-original" value="original" />|Hear original language|
+            </label>
+            <label>
+              <input type="radio" name="mode" id="mode-hear-interpretation" value="hear-interpretation" />|Hear interpretation|
+            </label>
+            <label>
+              <input type="radio" name="mode" id="mode-provide-interpretation" value="provide-interpretation" />|Provide Interpretation|
+            </label>
+          </div>
+      </div>
+      <div class="row">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Chat</h3>
+          </div>
+          <div class="panel-body">
+            <div id="chatwin"></div>
+            <div id="chat-control">
+              <textarea class="form-control" id="chatmsg" placeholder="|Type your message and hit enter on your keyboard|"></textarea><button style="display:none;" id="chatsend">Send</button>
+              <input type="text" id="name" class="form-control" placeholder="|Enter your name here|" />
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <label><input type="radio" name="mic" id="mic-mute" value="mute" />|Mute|</label>
-        <label><input type="radio" name="mic" id="mic-unmute" value="unmute" />|Unmute|</label>
-      </div>
-
-      <div id="interpretation-mode">
-        <img id="headset" src="{base}/images/headset.bi.png" alt="headset" />
-        <!-- Headset image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Crystal_Clear_app_voice-support.png) and
-        author Everaldo Coelho (https://en.wikipedia.org/wiki/Everaldo_Coelho) and Yellowicon (http://www.yellowicon.com/) -->
-        <label><input type="radio" name="mode" id="mode-original" value="original" />|Hear original language|</label>
-        <label><input type="radio" name="mode" id="mode-hear-interpretation" value="hear-interpretation" />|Hear interpretation|</label>
-        <label><input type="radio" name="mode" id="mode-provide-interpretation" value="provide-interpretation" />|Provide interpretation|</label>
-      </div>
     </div>
 
     <!-- The audio tag is not seen by the user (unless their browser doesn't support it) -->
-    <div id="audio">
+    <div class="row" id="audio">
       <audio id="audio-remote" autoplay="autoplay">
-        |Sorry, you have no audio capabilities! Please use chrome or chromium great than version 25.|
+        |Sorry, you have no audio capabilities! Please use chrome, chromium or firefox greater than version 25.|
       </audio>
+    </div>
+    
+    <div class="row" id="connect-instructions">
+      <p class="text-muted pstn-instructions">|This system only works with recent versions Firefox and Chrome. It does not work on iPads or iPhones. Click the connect button to join the conference call. If you have technical problems, you may also connected by dialing: USA 1 402 772 0337 or MEXICO 52 55 85262875 and choose extension 6, and then enter conference number: |<span class="pstn-instructions-conference-number"></span></p>
     </div>
     <script type="text/javascript" src="/javascript/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="/javascript/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="{base}/bootstrap/js/bootstrap.min.js"></script>
     <script src="{base}/js/config.js" type="text/javascript"> </script>
     <script src="{base}/js/jquery.json-2.4.min.js" type="text/javascript"> </script>
     <script src="{base}/js/jquery.FSRTC.js" type="text/javascript"> </script>
@@ -72,5 +97,6 @@
     <script src="{base}/js/jquery.verto.js" type="text/javascript"> </script>
     <script src="{base}/js/mexcla-html5.js" type="text/javascript"> </script>
     <!-- apt-get install libjs-jquery libjs-jquery-ui javascript-common -->
+
   </body>
 </html>
