@@ -3,11 +3,11 @@ body {
   margin-right: 5%;
 }
 
-#panel-body {
-  height: 150px;
+.panel-body {
+  height: 175px;
 }
 
-#chatwin {
+#chat-win {
   overflow: auto;
   height: 124px;
 }

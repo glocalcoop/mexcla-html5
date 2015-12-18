@@ -1,6 +1,6 @@
 var cur_call = null;
 var verto;
-
+var debug;
 $(document).ready(function() {
     mexcla_init();
 });
@@ -128,17 +128,23 @@ function mexcla_call_init() {
     return false;
   }
    
+  // Ensure they filled in their name
+  if(!$("#name").val()) {
+    alert("Please enter a name to join the call.");
+    return false;
+  }
   if(cur_call) {
     return;
   }
 
   cur_call = verto.newCall({
     destination_number: "9999",
-    caller_id_name: "Mexcla",
-    caller_id_number: "web",
+    caller_id_name: $("#name").val(),
+    caller_id_number: conf,
     useVideo: false,
     useStereo: false
   },callbacks);
+
   verto.subscribe("presence", {
     handler: function(v, e) {
       mexcla_presence_event(e);
@@ -149,7 +155,11 @@ function mexcla_call_init() {
       mexcla_message_event(e);
     }
   });
-
+  verto.subscribe("FSevent.custom::conference::maintenance", {
+    handler: function(v, e) {
+      mexcla_custom_conference_maintenance_event(e);
+    }
+  });
   // Initialize radio buttons
   mexcla_check_radio_button('mic-unmute');
   mexcla_check_radio_button('mode-original');
@@ -192,16 +202,47 @@ function mexcla_message_event(e) {
   if (dest_conf != mexcla_get_conference_number()) {
     return;
   }
-  $('#chatwin')
+  $('#chat-win')
     .append($('<span class="chatuid" />').text(from + ': '))
     .append(mexcla_text_to_jq(body));
-  $('#chatwin').animate({"scrollTop": $('#chatwin')[0].scrollHeight}, "fast");
+  $('#chat-win').animate({"scrollTop": $('#chat-win')[0].scrollHeight}, "fast");
 }
 
 function mexcla_presence_event(e) {
   console.log("presence event");
   console.log(e);
 } 
+
+function mexcla_custom_conference_maintenance_event(e) {
+  console.log("maintenance event received");
+  console.log(e.data.Action);
+  console.log(e);
+  // Only pay attention to events related to our conference.
+  if(e.data["Conference-Name"] && e.data["Conference-Name"] == mexcla_get_conference_number()) {
+    switch(e.data.Action) {
+      case "add-member":
+        console.log("Adding member");
+        name =  e.data["Caller-Caller-ID-Name"];
+        uid =  e.data["Caller-Unique-ID"];
+        $("ul#participant-list").append($("<li />")
+          .attr('id', uid)
+          .text(name)
+        );
+        break;
+      case "del-member":
+        $("#" + uid).remove();
+        break;
+      case "start-talking":
+        console.log("Start talking");
+        $("#" + uid).css("font-weight","bold");
+        break;
+      case "stop-talking":
+        console.log("Stopped talking");
+        $("#" + uid).css("font-weight","normal");
+        break;
+    }
+  }
+}
 
 // Copied from verto.js library.
 function mexcla_text_to_jq(body) {
@@ -316,6 +357,8 @@ function change_submit_button_value(val) {
   $('#connect-button-text').text(val);
   if(val == lang_connect) {
     $('#call-options').hide();
+    // Keep the chat windows showing in case there are notes people still
+    // want to keep.
   }
   else if(val == lang_disconnect) {
     // We're connecting... kill the dots animation.
@@ -323,6 +366,7 @@ function change_submit_button_value(val) {
     // Ensure there are no current dots.
     mexcla_dots('');
     $('#call-options').show();
+    $('#chat-and-participants').show();
   }
   else {
     // When we are connecting... we should update the text to add an animation effect
