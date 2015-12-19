@@ -1,0 +1,26 @@
+# Here is an nginx snippet
+  location / {
+    try_files $uri @parseurl;
+  }
+
+  location @parseurl {
+    # If no conference number is specified, direct them to conferece number
+    # 1, the default.
+    if ($uri !~ "[0-9]+") {
+      return 301 http://mexcla.turkey/en/1;
+    }
+    # If they have a conference number and language determiner, then we are
+    # done, simply rewrite to the correct index file.
+    rewrite "/(es|en)/" /index.$1.html last;
+
+    # Try to guess the language based on browser preference sent with
+    # request. If spanish... give spanish page.
+    if ($http_accept_language ~ "^es" ) {
+      rewrite "(.*)" /es/$1;
+    }
+    if ($http_accept_language !~ "^es" ) {
+      rewrite "(.*)" /en/$1;
+    }
+  }
+
+
