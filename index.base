@@ -13,6 +13,9 @@
       var lang_disconnect = '|Disconnect|';
       var lang_not_yet_connected = '|Your call is not yet connected|';
       var lang_direct_link = '|Direct link|'; 
+      var lang_hear_original_language = '|Hear original language|';
+      var lang_hear_interpretation = '|Hear interpretation|';
+      var lang_provide_interpretation = '|Provide interpretation|';
     </script>
   </head>
   <body>
@@ -43,7 +46,7 @@
       <div class="row" id="microphone-status" class="radio">
         <div class="radio">
           <img id="mic" src="{base}/images/mic.unmuted.png" alt="microphone" />
-            <!-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
+            !-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
               seems to have improved a version from Mimi Ladha. -->
               <label><input type="radio" name="mic" id="mic-mute" value="mute" />|Mute|</label>
             <label><input type="radio" name="mic" id="mic-unmute" value="unmute" />|Unmute|</label>
@@ -83,8 +86,15 @@
           <h3 class="panel-title">Participants</h3>
         </div>
         <div class="panel-body" id="participant-win">
-          <ul id="participant-list">
-          </ul>
+          <table class="table" id="participant-list">
+            <thead>
+              <tr>
+                <th>Name</th><th>Number</th><th>Location</th><th>Latency (ms)</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
         </div>
       </div>
 

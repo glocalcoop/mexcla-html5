@@ -1,6 +1,6 @@
 var cur_call = null;
 var verto;
-var debug;
+var my_uid = null;
 $(document).ready(function() {
     mexcla_init();
 });
@@ -34,19 +34,23 @@ function mexcla_setup_chat() {
 	  if (!cur_call) {
 	    return;
 	  }
-	  cur_call.message({to: "public@talk.mayfirst.org", 
-			  body: $("#chatmsg").val(), 
-			  from_msg_name: $("#name").val(), 
-			  from_msg_number: mexcla_get_conference_number()
-	 });  
-	 $("#chatmsg").val("");
- });
+    mexcla_send_message($("#chatmsg").val());
+	  $("#chatmsg").val("");
+  });
 
   $("#chatmsg").keyup(function (event) {
     if (event.keyCode == 13 && !event.shiftKey) {
 	    $( "#chatsend" ).trigger( "click" );   
 	  }
   });
+}
+
+function mexcla_send_message(msg) {
+  cur_call.message({to: "public@talk.mayfirst.org", 
+    body: msg,
+    from_msg_name: $("#name").val(), 
+    from_msg_number: mexcla_get_conference_number()
+ });
 }
 
 function mexcla_toggle_call_status() {
@@ -202,10 +206,34 @@ function mexcla_message_event(e) {
   if (dest_conf != mexcla_get_conference_number()) {
     return;
   }
-  $('#chat-win')
-    .append($('<span class="chatuid" />').text(from + ': '))
-    .append(mexcla_text_to_jq(body));
-  $('#chat-win').animate({"scrollTop": $('#chat-win')[0].scrollHeight}, "fast");
+  // Filter out special cmds.
+  if(body.search("#^/location:#")) {
+    cmd_parts = body.split(':');
+    cmd = cmd_parts[0];
+    value = cmd_parts[1];
+    uid = cmd_parts[2];
+    if(cmd == "/location") {
+      console.log("Special message " + cmd);
+      switch(value) {
+        case "original":
+          value = lang_hear_original_language;
+          break;
+        case "interpretation-hear":
+          value = lang_hear_interpretation;
+          break;
+        case "interpretation-provide":
+          value = lang_provide_interpretation;
+      }
+      $("tr#" + uid + " td.participant-location").text(value);
+    }
+  }
+  else {
+    $('#chat-win')
+      .append($('<span class="chatuid" />').text(from + ': '))
+      .append(mexcla_text_to_jq(body))
+      .append($('<br />'));
+    $('#chat-win').animate({"scrollTop": $('#chat-win')[0].scrollHeight}, "fast");
+  }
 }
 
 function mexcla_presence_event(e) {
@@ -224,10 +252,18 @@ function mexcla_custom_conference_maintenance_event(e) {
         console.log("Adding member");
         name =  e.data["Caller-Caller-ID-Name"];
         uid =  e.data["Caller-Unique-ID"];
-        $("ul#participant-list").append($("<li />")
-          .attr('id', uid)
-          .text(name)
-        );
+        ip = e.data["Caller-Network-Addr"];
+
+        // We should be the first person we detect joining the conference,
+        // so if our uid is not set, set it now so we know who we are.
+        if(!my_uid) {
+          my_uid = uid;
+        }
+        $("#participant-list").append($("<tr />").attr('id', uid));
+        $("#" + uid).append($('<td />').text(name));
+        $("#" + uid).append($('<td />').text(ip));
+        $("#" + uid).append($('<td />').attr('class', 'participant-location').text(lang_hear_original_language));
+        $("#" + uid).append($('<td />').text("N/A"));
         break;
       case "del-member":
         $("#" + uid).remove();
@@ -422,6 +458,7 @@ function mexcla_mode_original() {
     target_src = current_src.replace(/headset\.(terp|mono)\.png/, 'headset.bi.png');
     $('#headset').attr('src', target_src);
     mexcla_check_radio_button('mode-original');
+    mexcla_send_message("/location:original:" + my_uid);
   }
 }
 function mexcla_mode_hear_interpretation() {
@@ -430,6 +467,7 @@ function mexcla_mode_hear_interpretation() {
     target_src = current_src.replace(/headset\.(bi|terp)\.png/, 'headset.mono.png');
     $('#headset').attr('src', target_src);
     mexcla_check_radio_button('mode-hear-interpretation');
+    mexcla_send_message("/location:interpretation-hear:" + my_uid);
   }
 }
 function mexcla_mode_provide_interpretation() {
@@ -438,6 +476,7 @@ function mexcla_mode_provide_interpretation() {
     target_src = current_src.replace(/headset\.(bi|mono)\.png/, 'headset.terp.png');
     $('#headset').attr('src', target_src);
     mexcla_check_radio_button('mode-provide-interpretation');
+    mexcla_send_message("/location:interpretation-provide:" + my_uid);
   }
 }
 
