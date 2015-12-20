@@ -253,7 +253,20 @@ function mexcla_custom_conference_maintenance_event(e) {
         name =  e.data["Caller-Caller-ID-Name"];
         uid =  e.data["Caller-Unique-ID"];
         ip = e.data["Caller-Network-Addr"];
+        caller_id = e.data["Caller-Caller-ID-Number"];
 
+        // If they are coming in from mexcla, then their caller_id will 
+        // be set to the conference number. That's not useful, so we 
+        // display their IP address instead. On the other hand, if they 
+        // are coming in via a telephone, their IP is not useful, so we 
+        // want the caller id.
+
+        if (caller_id == mexcla_get_conference_number()) {
+          number = ip;
+        }
+        else {
+          number = caller_id;
+        }
         // We should be the first person we detect joining the conference,
         // so if our uid is not set, set it now so we know who we are.
         if(!my_uid) {
@@ -261,7 +274,7 @@ function mexcla_custom_conference_maintenance_event(e) {
         }
         $("#participant-list").append($("<tr />").attr('id', uid));
         $("#" + uid).append($('<td />').text(name));
-        $("#" + uid).append($('<td />').text(ip));
+        $("#" + uid).append($('<td />').text(number));
         $("#" + uid).append($('<td />').attr('class', 'participant-location').text(lang_hear_original_language));
         $("#" + uid).append($('<td />').text("N/A"));
         break;
