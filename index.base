@@ -46,9 +46,9 @@
       <div class="row" id="microphone-status" class="radio">
         <div class="radio">
           <img id="mic" src="{base}/images/mic.unmuted.png" alt="microphone" />
-            !-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
+            <!-- Mic image thanks to wikimedia (https://commons.wikimedia.org/wiki/File:Exquisite-microphone.png) and KDE which
               seems to have improved a version from Mimi Ladha. -->
-              <label><input type="radio" name="mic" id="mic-mute" value="mute" />|Mute|</label>
+            <label><input type="radio" name="mic" id="mic-mute" value="mute" />|Mute|</label>
             <label><input type="radio" name="mic" id="mic-unmute" value="unmute" />|Unmute|</label>
         </div>
       </div>
