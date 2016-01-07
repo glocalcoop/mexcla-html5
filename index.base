@@ -89,7 +89,7 @@
           <table class="table" id="participant-list">
             <thead>
               <tr>
-                <th>Name</th><th>Number</th><th>Location</th><th>Latency (ms)</th>
+                <th>Name</th><th>Location</th><th>Latency (ms)</th>
               </tr>
             </thead>
             <tbody>

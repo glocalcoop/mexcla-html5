@@ -1,6 +1,11 @@
 var cur_call = null;
 var verto;
-var my_uid = null;
+
+// my_key keeps track of my unique id for this call,, which is used 
+// as the css/dom id for my row in the participants list.
+var my_key = null;
+var liveArray = null;
+
 $(document).ready(function() {
     mexcla_init();
 });
@@ -81,6 +86,72 @@ function mexcla_init() {
   mexcla_setup_chat();
 }
 
+verto_obj_callbacks = {
+  onMessage: function(verto, dialog, msg, data) {
+    if (msg == $.verto.enum.message.pvtEvent) {
+      if (data.pvtData) {
+        if (data.pvtData.action == "conference-liveArray-join") {
+          var context = data.pvtData.laChannel;
+          var name = data.pvtData.laName;
+          var laConfig = { subParams: { callID: dialog } };
+          liveArray = new $.verto.liveArray(verto, context, name, laConfig); 
+          liveArray.onChange = function(obj, args) {
+            if (args.action) {
+              console.log("Live array onchange triggered with action: " + args.action);
+              console.log(args);
+              if (args.action == 'bootObj') {
+                for (i = 0; i < args.data.length; i++) {
+                  var key = args.data[i][0];
+                  var name = args.data[i][1][2];
+                  var dataProps = $.parseJSON(args.data[i][1][4]);
+                  mexcla_add_member(key, name);
+                  mexcla_set_member_talking(key, dataProps.audio.talking);
+                }
+              }
+              if (args.action == 'add') {
+                var key = args.key;
+                var name = args.data[2];
+                mexcla_add_member(key, name);
+              }
+              if (args.action == 'del') {
+                var key = args.key;
+                $("#" + key).remove();
+              }
+              if (args.action == 'modify') {
+                var key = args.key;
+                // var talking = args.data[4].audio.talking;
+                var dataProps = $.parseJSON(args.data[4]);
+                mexcla_set_member_talking(key, dataProps.audio.talking);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+verto_call_callbacks = {
+  onDialogState: function(d) {
+    cur_call = d;
+    switch (d.state) {
+      case $.verto.enum.state.requesting:
+        change_submit_button_value(lang_connecting);
+        break;
+      case $.verto.enum.state.active:
+        change_submit_button_value(lang_disconnect);
+        mexcla_join_conference();
+        // Record what my unique key is so I can reference it when sending 
+        // special chat messages.
+        my_key = cur_call.callID;
+        break;
+      case $.verto.enum.state.hangup:
+        mexcla_hangup();
+        break;
+    }
+  }
+}
+
 function mexcla_login() {
   verto = new $.verto({
       login: config.impi,
@@ -94,7 +165,7 @@ function mexcla_login() {
         googHighpassFilter: false
       },
       iceServers: true,
-  });
+  }, verto_obj_callbacks);
 }
 
 function mexcla_init_language_links() {
@@ -119,6 +190,8 @@ function mexcla_init_language_links() {
 function mexcla_get_hash() {
   return 'mexcla-' + mexcla_get_conference_number();
 }
+
+
 
 function mexcla_call_init() {
   // Ensure we have a conference number
@@ -147,21 +220,11 @@ function mexcla_call_init() {
     caller_id_number: conf,
     useVideo: false,
     useStereo: false
-  },callbacks);
+  }, verto_call_callbacks);
 
-  verto.subscribe("presence", {
-    handler: function(v, e) {
-      mexcla_presence_event(e);
-    }
-  });
   verto.subscribe("FSevent.message", {
     handler: function(v, e) {
       mexcla_message_event(e);
-    }
-  });
-  verto.subscribe("FSevent.custom::conference::maintenance", {
-    handler: function(v, e) {
-      mexcla_custom_conference_maintenance_event(e);
     }
   });
   // Initialize radio buttons
@@ -178,25 +241,6 @@ function mexcla_unload() {
   mexcla_hangup();
 }
 
-callbacks = {
-  onDialogState: function(d) {
-    cur_call = d;
-    console.log(d.state);
-    switch (d.state) {
-      case $.verto.enum.state.requesting:
-        change_submit_button_value(lang_connecting);
-        break;
-      case $.verto.enum.state.active:
-        change_submit_button_value(lang_disconnect);
-        mexcla_join_conference();
-        break;
-      case $.verto.enum.state.hangup:
-        mexcla_hangup();
-        break;
-    }
-  }
-}
-
 function mexcla_message_event(e) {
   console.log("message event");
   body = e.data._body;
@@ -207,13 +251,14 @@ function mexcla_message_event(e) {
     return;
   }
   // Filter out special cmds.
-  if(body.search("#^/location:#")) {
+  if(body.search("^/location:") != -1) {
     cmd_parts = body.split(':');
     cmd = cmd_parts[0];
     value = cmd_parts[1];
     uid = cmd_parts[2];
     if(cmd == "/location") {
-      console.log("Special message " + cmd);
+      console.log("Special message " + body);
+      console.log("Special message uid" + uid);
       switch(value) {
         case "original":
           value = lang_hear_original_language;
@@ -236,60 +281,23 @@ function mexcla_message_event(e) {
   }
 }
 
-function mexcla_presence_event(e) {
-  console.log("presence event");
-  console.log(e);
-} 
+function mexcla_add_member(key, name) {
+  if ($('#' + key).length) {
+    // Don't re-add a member if they have already been added.
+    return;
+  }
+  $("#participant-list").append($("<tr />").attr('id', key));
+  $("#" + key).append($('<td />').text(name));
+  $("#" + key).append($('<td />').attr('class', 'participant-location').text(lang_hear_original_language));
+  $("#" + key).append($('<td />').text("N/A"));
+}
 
-function mexcla_custom_conference_maintenance_event(e) {
-  console.log("maintenance event received");
-  console.log(e.data.Action);
-  console.log(e);
-  // Only pay attention to events related to our conference.
-  if(e.data["Conference-Name"] && e.data["Conference-Name"] == mexcla_get_conference_number()) {
-    switch(e.data.Action) {
-      case "add-member":
-        console.log("Adding member");
-        name =  e.data["Caller-Caller-ID-Name"];
-        uid =  e.data["Caller-Unique-ID"];
-        ip = e.data["Caller-Network-Addr"];
-        caller_id = e.data["Caller-Caller-ID-Number"];
-
-        // If they are coming in from mexcla, then their caller_id will 
-        // be set to the conference number. That's not useful, so we 
-        // display their IP address instead. On the other hand, if they 
-        // are coming in via a telephone, their IP is not useful, so we 
-        // want the caller id.
-
-        if (caller_id == mexcla_get_conference_number()) {
-          number = ip;
-        }
-        else {
-          number = caller_id;
-        }
-        // We should be the first person we detect joining the conference,
-        // so if our uid is not set, set it now so we know who we are.
-        if(!my_uid) {
-          my_uid = uid;
-        }
-        $("#participant-list").append($("<tr />").attr('id', uid));
-        $("#" + uid).append($('<td />').text(name));
-        $("#" + uid).append($('<td />').text(number));
-        $("#" + uid).append($('<td />').attr('class', 'participant-location').text(lang_hear_original_language));
-        $("#" + uid).append($('<td />').text("N/A"));
-        break;
-      case "del-member":
-        $("#" + uid).remove();
-        break;
-      case "start-talking":
-        console.log("Start talking");
-        $("#" + uid).css("font-weight","bold");
-        break;
-      case "stop-talking":
-        console.log("Stopped talking");
-        $("#" + uid).css("font-weight","normal");
-        break;
-    }
+function mexcla_set_member_talking(key, talking) {
+  if(talking) {
+    $("#" + key).css("font-weight","bold");
+  }
+  else {
+    $("#" + key).css("font-weight","normal");
   }
 }
 
@@ -471,7 +479,7 @@ function mexcla_mode_original() {
     target_src = current_src.replace(/headset\.(terp|mono)\.png/, 'headset.bi.png');
     $('#headset').attr('src', target_src);
     mexcla_check_radio_button('mode-original');
-    mexcla_send_message("/location:original:" + my_uid);
+    mexcla_send_message("/location:original:" + my_key);
   }
 }
 function mexcla_mode_hear_interpretation() {
@@ -480,7 +488,7 @@ function mexcla_mode_hear_interpretation() {
     target_src = current_src.replace(/headset\.(bi|terp)\.png/, 'headset.mono.png');
     $('#headset').attr('src', target_src);
     mexcla_check_radio_button('mode-hear-interpretation');
-    mexcla_send_message("/location:interpretation-hear:" + my_uid);
+    mexcla_send_message("/location:interpretation-hear:" + my_key);
   }
 }
 function mexcla_mode_provide_interpretation() {
@@ -489,7 +497,7 @@ function mexcla_mode_provide_interpretation() {
     target_src = current_src.replace(/headset\.(bi|mono)\.png/, 'headset.terp.png');
     $('#headset').attr('src', target_src);
     mexcla_check_radio_button('mode-provide-interpretation');
-    mexcla_send_message("/location:interpretation-provide:" + my_uid);
+    mexcla_send_message("/location:interpretation-provide:" + my_key);
   }
 }
 
