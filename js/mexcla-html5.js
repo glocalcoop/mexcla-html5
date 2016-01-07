@@ -6,6 +6,8 @@ var verto;
 var my_key = null;
 var liveArray = null;
 
+var sessid = null;
+
 $(document).ready(function() {
     mexcla_init();
 });
@@ -97,9 +99,10 @@ verto_obj_callbacks = {
           liveArray = new $.verto.liveArray(verto, context, name, laConfig); 
           liveArray.onChange = function(obj, args) {
             if (args.action) {
-              console.log("Live array onchange triggered with action: " + args.action);
-              console.log(args);
               if (args.action == 'bootObj') {
+                if (data.eventChannel) {
+                  sessid = data.eventChannel;
+                }
                 for (i = 0; i < args.data.length; i++) {
                   var key = args.data[i][0];
                   var name = args.data[i][1][2];
@@ -242,7 +245,6 @@ function mexcla_unload() {
 }
 
 function mexcla_message_event(e) {
-  console.log("message event");
   body = e.data._body;
   from = e.data.from_msg_name;
   dest_conf = e.data.from_msg_number;
@@ -257,8 +259,6 @@ function mexcla_message_event(e) {
     value = cmd_parts[1];
     uid = cmd_parts[2];
     if(cmd == "/location") {
-      console.log("Special message " + body);
-      console.log("Special message uid" + uid);
       switch(value) {
         case "original":
           value = lang_hear_original_language;
