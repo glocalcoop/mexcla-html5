@@ -534,7 +534,7 @@ function mexcla_mode_provide_interpretation() {
 }
 
 function mexcla_speed_test() {
-  verto.rpcClient.speedTest(500, function(msg, data) {
+  verto.rpcClient.speedTest(5000, function(msg, data) {
     mexcla_send_message("/speedtest:" + data.downKPS + '/' + data.upKPS + ":" + my_key);
     console.log(data);
   });
