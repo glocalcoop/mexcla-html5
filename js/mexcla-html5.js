@@ -123,7 +123,17 @@ verto_obj_callbacks = {
                 }
                 for (i = 0; i < args.data.length; i++) {
                   var key = args.data[i][0];
+                  // The number for web paricipants is the same as the
+                  // conference number (not very helpful). But for phone in
+                  // participants, it's their phone number, which  might be a
+                  // useful way to identify them if the auto-lookup of caller
+                  // id is not successful.
+                  var number = args.data[i][1][1];
                   var name = args.data[i][1][2];
+
+                  if (number && number != mexcla_get_conference_number()) {
+                    name = name + ' (' + number + ')';
+                  }
                   var dataProps = $.parseJSON(args.data[i][1][4]);
                   mexcla_add_member(key, name);
                   mexcla_set_member_talking(key, dataProps.audio.talking);
@@ -132,7 +142,11 @@ verto_obj_callbacks = {
               // A new members is added.
               if (args.action == 'add') {
                 var key = args.key;
+                var number = args.data[1];
                 var name = args.data[2];
+                if (number && number != mexcla_get_conference_number()) {
+                  name = name + ' (' + number + ')';
+                }
                 mexcla_add_member(key, name);
               }
               // A member has left.
