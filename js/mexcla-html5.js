@@ -13,6 +13,9 @@ var liveArray = null;
 // to use this yet...
 var sessid = null;
 
+// chatID is used to ensure we only send chat messages to our conference.
+var chatID = null;
+
 $(document).ready(function() {
     mexcla_init();
 });
@@ -58,7 +61,7 @@ function mexcla_setup_chat() {
 }
 
 function mexcla_send_message(msg) {
-  cur_call.message({to: "public@talk.mayfirst.org", 
+  cur_call.message({to: chatID, 
     body: msg,
     from_msg_name: $("#name").val(), 
     from_msg_number: mexcla_get_conference_number()
@@ -95,8 +98,17 @@ function mexcla_init() {
 
 verto_obj_callbacks = {
   onMessage: function(verto, dialog, msg, data) {
+    if (msg == $.verto.enum.message.info) {
+      // Handle chat message.
+      mexcla_message_event(data);
+    }
     if (msg == $.verto.enum.message.pvtEvent) {
+      // Handle change in conference participants.
       if (data.pvtData) {
+        // chatID is a global variable that represents this conference.
+        // It is used for sending chat messages to ensure we only send/receive
+        // to our conference.
+        chatID = data.pvtData.chatID;
         if (data.pvtData.action == "conference-liveArray-join") {
           var context = data.pvtData.laChannel;
           var name = data.pvtData.laName;
@@ -104,6 +116,7 @@ verto_obj_callbacks = {
           liveArray = new $.verto.liveArray(verto, context, name, laConfig); 
           liveArray.onChange = function(obj, args) {
             if (args.action) {
+              // bootObj means the initial object when we first join.
               if (args.action == 'bootObj') {
                 if (data.eventChannel) {
                   sessid = data.eventChannel;
@@ -116,15 +129,18 @@ verto_obj_callbacks = {
                   mexcla_set_member_talking(key, dataProps.audio.talking);
                 }
               }
+              // A new members is added.
               if (args.action == 'add') {
                 var key = args.key;
                 var name = args.data[2];
                 mexcla_add_member(key, name);
               }
+              // A member has left.
               if (args.action == 'del') {
                 var key = args.key;
                 $("#" + key).remove();
               }
+              // A member has been modified (started/stopped talking etc)
               if (args.action == 'modify') {
                 var key = args.key;
                 // var talking = args.data[4].audio.talking;
@@ -230,11 +246,6 @@ function mexcla_call_init() {
     useStereo: false
   }, verto_call_callbacks);
 
-  verto.subscribe("FSevent.message", {
-    handler: function(v, e) {
-      mexcla_message_event(e);
-    }
-  });
   // Initialize radio buttons
   mexcla_check_radio_button('mic-unmute');
   mexcla_check_radio_button('mode-original');
@@ -249,14 +260,9 @@ function mexcla_unload() {
   mexcla_hangup();
 }
 
-function mexcla_message_event(e) {
-  body = e.data._body;
-  from = e.data.from_msg_name;
-  dest_conf = e.data.from_msg_number;
-  // Filter out messages for different conference rooms
-  if (dest_conf != mexcla_get_conference_number()) {
-    return;
-  }
+function mexcla_message_event(data) {
+  body = data.body;
+  from = data.from_msg_name;
   // Filter out special cmds.
   if(body.search("^/location:") != -1) {
     cmd_parts = body.split(':');
