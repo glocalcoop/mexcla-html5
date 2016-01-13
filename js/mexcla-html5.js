@@ -1,11 +1,16 @@
 var cur_call = null;
 var verto;
 
-// my_key keeps track of my unique id for this call,, which is used 
-// as the css/dom id for my row in the participants list.
+// my_key keeps track of the user's unique id for this call,, which is
+// used as the css/dom id for the user's row in the participants list.
 var my_key = null;
+
+// liveArray is the object that keeps track of all the participants
+// on the call.
 var liveArray = null;
 
+// sessid represents the session id for this conference. Not sure how
+// to use this yet...
 var sessid = null;
 
 $(document).ready(function() {
@@ -248,7 +253,7 @@ function mexcla_message_event(e) {
   body = e.data._body;
   from = e.data.from_msg_name;
   dest_conf = e.data.from_msg_number;
-  // Filter out messages for difference conference rooms
+  // Filter out messages for different conference rooms
   if (dest_conf != mexcla_get_conference_number()) {
     return;
   }
