@@ -138,6 +138,7 @@ verto_obj_callbacks = {
                   mexcla_add_member(key, name);
                   mexcla_set_member_talking(key, dataProps.audio.talking);
                 }
+                mexcla_speed_test();
               }
               // A new members is added.
               if (args.action == 'add') {
@@ -148,11 +149,13 @@ verto_obj_callbacks = {
                   name = name + ' (' + number + ')';
                 }
                 mexcla_add_member(key, name);
+                mexcla_speed_test();
               }
               // A member has left.
               if (args.action == 'del') {
                 var key = args.key;
                 $("#" + key).remove();
+                mexcla_speed_test();
               }
               // A member has been modified (started/stopped talking etc)
               if (args.action == 'modify') {
@@ -160,6 +163,7 @@ verto_obj_callbacks = {
                 // var talking = args.data[4].audio.talking;
                 var dataProps = $.parseJSON(args.data[4]);
                 mexcla_set_member_talking(key, dataProps.audio.talking);
+                mexcla_speed_test();
               }
             }
           }
@@ -278,7 +282,7 @@ function mexcla_message_event(data) {
   body = data.body;
   from = data.from_msg_name;
   // Filter out special cmds.
-  if(body.search("^/location:") != -1) {
+  if(body.search("^/location|speedtest:") != -1) {
     cmd_parts = body.split(':');
     cmd = cmd_parts[0];
     value = cmd_parts[1];
@@ -295,6 +299,9 @@ function mexcla_message_event(data) {
           value = lang_provide_interpretation;
       }
       $("tr#" + uid + " td.participant-location").text(value);
+    }
+    if (cmd == "/speedtest") {
+      $("tr#" + uid + " td.participant-speedtest").text(value);
     }
   }
   else {
@@ -314,7 +321,7 @@ function mexcla_add_member(key, name) {
   $("#participant-list").append($("<tr />").attr('id', key));
   $("#" + key).append($('<td />').text(name));
   $("#" + key).append($('<td />').attr('class', 'participant-location').text(lang_hear_original_language));
-  $("#" + key).append($('<td />').text("N/A"));
+  $("#" + key).append($('<td />').attr('class', 'participant-speedtest').text("N/A"));
 }
 
 function mexcla_set_member_talking(key, talking) {
@@ -526,3 +533,9 @@ function mexcla_mode_provide_interpretation() {
   }
 }
 
+function mexcla_speed_test() {
+  verto.rpcClient.speedTest(500, function(msg, data) {
+    mexcla_send_message("/speedtest:" + data.downKPS + '/' + data.upKPS + ":" + my_key);
+    console.log(data);
+  });
+}
