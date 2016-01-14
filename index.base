@@ -70,17 +70,6 @@
       </div>
     </div>
     <div id="chat-and-participants" class="row" style="display:none;">
-      <div id="chat" class="panel panel-default col-xs-12 col-md-6">
-        <div class="panel-heading">
-          <h3 class="panel-title">Chat</h3>
-        </div>
-        <div class="panel-body">
-          <div id="chat-win"></div>
-          <div id="chat-control">
-            <input class="form-control" id="chatmsg" placeholder="|Type your message and hit enter on your keyboard|"></input><button style="display:none;" id="chatsend">Send</button>
-          </div>
-        </div>
-      </div>
       <div id="participants" class="panel panel-default col-xs-12 col-md-6">
         <div class="panel-heading">
           <h3 class="panel-title">Participants</h3>
@@ -98,6 +87,17 @@
         </div>
       </div>
 
+      <div id="chat" class="panel panel-default col-xs-12 col-md-6">
+        <div class="panel-heading">
+          <h3 class="panel-title">Chat</h3>
+        </div>
+        <div class="panel-body">
+          <div id="chat-win"></div>
+          <div id="chat-control">
+            <input class="form-control" id="chatmsg" placeholder="|Type your message and hit enter on your keyboard|"></input><button style="display:none;" id="chatsend">Send</button>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- The audio tag is not seen by the user (unless their browser doesn't support it) -->
     <div class="row" id="audio">

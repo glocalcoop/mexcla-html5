@@ -4,7 +4,7 @@ body {
 }
 
 .panel-body {
-  height: 175px;
+  min-height: 195px;
 }
 
 #chat-win {

@@ -130,32 +130,33 @@ verto_obj_callbacks = {
                   // id is not successful.
                   var number = args.data[i][1][1];
                   var name = args.data[i][1][2];
+                  var web_participant = true;
 
                   if (number && number != mexcla_get_conference_number()) {
+                    web_participant = false;
                     name = name + ' (' + number + ')';
                   }
                   var dataProps = $.parseJSON(args.data[i][1][4]);
-                  mexcla_add_member(key, name);
+                  mexcla_add_member(key, name, web_participant);
                   mexcla_set_member_talking(key, dataProps.audio.talking);
                 }
-                mexcla_speed_test();
               }
               // A new members is added.
               if (args.action == 'add') {
                 var key = args.key;
                 var number = args.data[1];
                 var name = args.data[2];
+                var web_participant = true;
                 if (number && number != mexcla_get_conference_number()) {
+                  web_participant = false;
                   name = name + ' (' + number + ')';
                 }
-                mexcla_add_member(key, name);
-                mexcla_speed_test();
+                mexcla_add_member(key, name, web_participant);
               }
               // A member has left.
               if (args.action == 'del') {
                 var key = args.key;
                 $("#" + key).remove();
-                mexcla_speed_test();
               }
               // A member has been modified (started/stopped talking etc)
               if (args.action == 'modify') {
@@ -163,7 +164,6 @@ verto_obj_callbacks = {
                 // var talking = args.data[4].audio.talking;
                 var dataProps = $.parseJSON(args.data[4]);
                 mexcla_set_member_talking(key, dataProps.audio.talking);
-                mexcla_speed_test();
               }
             }
           }
@@ -186,6 +186,9 @@ verto_call_callbacks = {
         // Record what my unique key is so I can reference it when sending 
         // special chat messages.
         my_key = cur_call.callID;
+        // Set a function to run every 10 seconds to report my network
+        // speed.
+        window.setInterval(mexcla_speed_test, 10000);
         break;
       case $.verto.enum.state.hangup:
         mexcla_hangup();
@@ -313,14 +316,21 @@ function mexcla_message_event(data) {
   }
 }
 
-function mexcla_add_member(key, name) {
+function mexcla_add_member(key, name, web_participant) {
   if ($('#' + key).length) {
     // Don't re-add a member if they have already been added.
     return;
   }
   $("#participant-list").append($("<tr />").attr('id', key));
   $("#" + key).append($('<td />').text(name));
-  $("#" + key).append($('<td />').attr('class', 'participant-location').text(lang_hear_original_language));
+
+  // Don't try to show participant location unless they are on the web.
+  var participant_location = 'N/A';
+  if(web_participant) {
+    participant_location = lang_hear_original_language;
+  }
+    
+  $("#" + key).append($('<td />').attr('class', 'participant-location').text(participant_location));
   $("#" + key).append($('<td />').attr('class', 'participant-speedtest').text("N/A"));
 }
 
